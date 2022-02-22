@@ -1,4 +1,4 @@
-# GemstonePrices
+# Gemstone Price Prediction
  
 Problem Statement: A company Gem Stones co. ltd., which is
 a cubic zirconia manufacturer had some data containing the
