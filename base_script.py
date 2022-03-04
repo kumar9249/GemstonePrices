@@ -41,20 +41,29 @@ def preprocess(raw_data, drop_cols):
     return processed_data
 
 
-def splitter(processed_data, y_var, split_ratio):   
+def splitter(processed_data, y_var, split_ratio=[]):   
     
     # Splitting the data into dependent & independent variables -
     X = processed_data.drop(columns=y_var, axis=1)
     y = processed_data[y_var].values
     
     # Performing train-test split -
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=split_ratio, 
-                                                        shuffle=True, random_state=0)
+    train_ratio = split_ratio[0] / 100
+    validation_ratio = split_ratio[1] / 100
+    test_ratio = split_ratio[2] / 100
+    
+    X_train, x_test, y_train, y_test = train_test_split(X, y, test_size=1-train_ratio, 
+                                                        shuffle=True, random_state=42)
+    
+    X_val, X_test, y_val, y_test = train_test_split(x_test, y_test, 
+                                                    test_size=test_ratio/(test_ratio + validation_ratio), 
+                                                    shuffle=True, random_state=42) 
     
     X_train = X_train.values
     X_test = X_test.values
+    X_val = X_val.values
     
-    return X, y, X_train, X_test, y_train, y_test
+    return X, y, X_train, X_test, X_val, y_train, y_test, y_val
     
 
 '''
@@ -70,11 +79,13 @@ def standardizer(X_train, X_test):
 '''
 
 
-def model_training(model_obj, X_train, X_test, y_train, y_test):
+def model_training(model_obj, X_train, X_test, X_val,  y_train, y_test, y_val):
     
     model_obj.fit(X_train, y_train)
-    y_pred = model_obj.predict(X_test)
-    print("R2 Score: {:.2f}".format(r2_score(y_test, y_pred)))
+    y_pred_test = model_obj.predict(X_test)
+    y_pred_val = model_obj.predict(X_val)
+    print("R2 Score (Test): {:.2f}".format(r2_score(y_test, y_pred_test)))
+    print("R2 Score (Validation): {:.2f}".format(r2_score(y_val, y_pred_val)))
     
     return model_obj
 
@@ -83,7 +94,7 @@ def cross_validation(model_obj, X, y):
     
     kfold = KFold(n_splits=5)
     accuracy = np.mean(cross_val_score(model_obj, X, y, cv=kfold, scoring='r2', n_jobs=-1)) 
-    print("Cross Validation accuracy: {:.2f}".format(accuracy))
+    print("Cross Validation Score: {:.2f}".format(accuracy))
     
 
 def dump_model(model_file, model_obj):

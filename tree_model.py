@@ -14,15 +14,16 @@ if __name__ == '__main__':
     data = pd.read_csv(r'D:\Projects\GemstonePrices\cubic_zirconia.csv')
     
     processed_data = base.preprocess(data, 
-                                     drop_cols=['Unnamed: 0', 'depth'])
+                                     drop_cols=['Unnamed: 0', 'depth', 'table'])
     
-    X, y, X_train, X_test, y_train, y_test = base.splitter(processed_data, 
-                                                           y_var='price', split_ratio=0.20)
+    X, y, X_train, X_test, X_val, y_train, y_test, y_val = base.splitter(processed_data, 
+                                                                         y_var='price', 
+                                                                         split_ratio=[70, 20, 10])
     
     # Decision Tree
     d_tree = DecisionTreeRegressor()
     
-    obj = base.model_training(d_tree, X_train, X_test, y_train, y_test)
+    obj = base.model_training(d_tree, X_train, X_test, X_val, y_train, y_test, y_val)
     base.cross_validation(d_tree, X, y)
 
     filename = r'tree_model.pkl'

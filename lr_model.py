@@ -14,15 +14,16 @@ if __name__ == '__main__':
     data = pd.read_csv(r'D:\Projects\GemstonePrices\cubic_zirconia.csv')
     
     processed_data = base.preprocess(data, 
-                                     drop_cols=['Unnamed: 0', 'depth'])
+                                     drop_cols=['Unnamed: 0', 'depth', 'table'])
     
-    X, y, X_train, X_test, y_train, y_test = base.splitter(processed_data, 
-                                                           y_var='price', split_ratio=0.20)
+    X, y, X_train, X_test, X_val, y_train, y_test, y_val = base.splitter(processed_data, 
+                                                                         y_var='price', 
+                                                                         split_ratio=[70, 20, 10])
     
     # Linear Regression
     lin_reg = LinearRegression()
     
-    obj = base.model_training(lin_reg, X_train, X_test, y_train, y_test)
+    obj = base.model_training(lin_reg, X_train, X_test, X_val, y_train, y_test, y_val)
     base.cross_validation(lin_reg, X, y)
     
     print("\n")
